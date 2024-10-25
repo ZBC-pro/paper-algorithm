@@ -15,6 +15,10 @@ class Episode:
         self.sequence = sequence    # 定义所有候选序列，如A-B-C，当状态完成这三个时，频率+1
         self.freq = 0
 
+    # 交互方法，将地址转化为字符串
+    def __repr__(self):
+        return f"Episode(sequence={self.sequence}, freq={self.freq})"
+
 # 将所有事件类型转化为wait(事件)
 # def wait_trans(event_stream):
 #     waits = defaultdict(list)
@@ -27,17 +31,40 @@ def init_waits(candidate_episodes):
     waits = defaultdict(list)
     for idx, episode in enumerate(candidate_episodes, start=1):
         first_event = episode.sequence[0]
-        waits[first_event].append((episode, 1))
+        waits[first_event].append((episode, 0))
         print(f"候选片段{idx} 初始化：waits({first_event}) = {(episode, 1)}")
 
     return waits
 
+# 移动事件到下一个并改变状态
+def remove_events(event_stream, waits):
+    for event, timestamp in event_stream:
+        if event in waits:
+            current_wait_list = waits[event][:]
+            for episode, state in current_wait_list:
+                print("\n**&&")
+                print(episode, state)
+                next_state = state + 1
+                if next_state >= len(episode.sequence):
+                    episode.freq += 1
+                    print(f"{episode.sequence} 匹配完成，增加频率：{episode.freq}")
+
+                    # 重置状态为 0，并将其加入到等待第一个事件的列表中
+                    first_event = episode.sequence[0]
+                    waits[first_event].append((episode, 0))
+                else:
+                    next_event = episode.sequence[next_state]
+                    waits[next_event].append((episode, next_state))
+                waits[event].remove((episode, state))
+    print("\n最终的候选片段频率：")
+    for episode in candidate_episodes:
+        print(f"{episode.sequence}: 出现次数 {episode.freq}")
 
 
 
 if __name__ == "__main__":
     candidate_episodes = [Episode(['A', 'B', 'C']), Episode(['B', 'C'])]
-    event_stream = [('A', 1), ('B', 3), ('D', 4), ('C', 6), ('E', 12), ('A', 14), ('B', 15), ('C', 17)]
+    event_stream = [('A', 1), ('B', 3), ('D', 4), ('C', 6), ('E', 12), ('A', 14), ('B', 15), ('C', 17), ('B', 18), ('C', 20)]
     lambda_min = 0.2
 
     waits = init_waits(candidate_episodes)
@@ -46,5 +73,21 @@ if __name__ == "__main__":
     print("\n初始化后的 waits 状态：")
     for event, waiting_list in waits.items():
         print(f"waits({event}) = {waiting_list}")
+
+    # print("\n***********")
+    # 遍历 waits 字典中的所有事件和等待列表
+    # for event, waiting_list in waits.items():
+    #     print(f"当前事件: {event}")
+    #
+    #     for episode, state in waiting_list:
+    #         # 输出 Episode 对象和状态
+    #         print(f"  Episode: {episode}, State: {state}")
+    #
+    #         # 如果需要单独提取 episode 的序列和频率
+    #         sequence = episode.sequence
+    #         freq = episode.freq
+    #         print(f"  Sequence: {sequence}, Frequency: {freq}")
+
+    remove_events(event_stream, waits)
 
 
