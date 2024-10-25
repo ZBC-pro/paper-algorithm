@@ -5,8 +5,10 @@
 在 B 中为(A → B → C， 2)，下一步为(A → B → C， 3)，当状态与len(squence)相同时，频次 +1，状态清0
 
 '''
-
+# 创建多个列表的库
 from collections import defaultdict
+# 复杂度分析
+import big_o
 
 bag = []
 
@@ -60,10 +62,17 @@ def remove_events(event_stream, waits):
     for episode in candidate_episodes:
         print(f"{episode.sequence}: 出现次数 {episode.freq}")
 
+# 用于big-O的时间复杂度分析
+def run_test(n):
+    candidate_episodes = [Episode(['A', 'B', 'C']), Episode(['B', 'C'])]
+    # 动态生成事件流，基于大小n
+    event_stream = [('A', i) if i % 2 == 0 else ('B', i) for i in range(n)]
+    waits = init_waits(candidate_episodes)
+    remove_events(event_stream, waits)
 
 
 if __name__ == "__main__":
-    candidate_episodes = [Episode(['A', 'B', 'C']), Episode(['B', 'C'])]
+    candidate_episodes = [Episode(['A', 'B', 'C']), Episode(['B', 'C']), Episode(['A', 'C'])]
     event_stream = [('A', 1), ('B', 3), ('D', 4), ('C', 6), ('E', 12), ('A', 14), ('B', 15), ('C', 17), ('B', 18), ('C', 20)]
     lambda_min = 0.2
 
@@ -90,4 +99,6 @@ if __name__ == "__main__":
 
     remove_events(event_stream, waits)
 
-
+    # 使用 big_o 的 big_o 函数进行复杂度测试
+    # best, complexity = big_o.big_o(run_test, big_o.datagen.n_, n_repeats=100)
+    # print(f"Estimated complexity: {best}")
