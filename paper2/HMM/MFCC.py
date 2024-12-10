@@ -1,3 +1,7 @@
+'''
+json输出格式是label + 特征向量
+'''
+
 import os
 import json
 import librosa
@@ -60,7 +64,7 @@ def main(input_dir, output_json):
 
 if __name__ == "__main__":
     # 输入文件夹路径和输出 JSON 文件路径
-    input_directory = r"path/to/your/audio/folder"  # 替换为包含 0～9 文件夹的根目录路径
+    input_directory = r"/Users/dususu/Desktop/data/test/train"
     output_file = "labeled_mfcc_features.json"  # 输出 JSON 文件的路径
 
     # 运行主程序
