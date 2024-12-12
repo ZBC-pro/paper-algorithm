@@ -16,6 +16,8 @@ import json
 from matplotlib import rcParams
 from matplotlib import font_manager
 
+import time
+
 # 找到系统中支持中文的字体
 font_path = "/System/Library/Fonts/Supplemental/Songti.ttc"  # 替换为系统中支持的字体路径
 custom_font = font_manager.FontProperties(fname=font_path)
@@ -24,8 +26,7 @@ custom_font = font_manager.FontProperties(fname=font_path)
 rcParams['font.family'] = font_manager.FontProperties(fname=font_path).get_name()
 
 # 查看支持的字体列表
-print(matplotlib.font_manager.findSystemFonts(fontpaths=None, fontext='ttf'))
-
+# print(matplotlib.font_manager.findSystemFonts(fontpaths=None, fontext='ttf'))
 
 
 # 数据预处理
@@ -78,7 +79,7 @@ def train_model(data):
     learned_hmm = {}    # 每个数字的模型都存为一个字典
     for label in data.keys():
         # 隐藏状态、混合高斯个数
-        model = hmm.GMMHMM(n_components=3, n_mix=2, covariance_type="diag", n_iter=1000)
+        model = hmm.GMMHMM(n_components=4, n_mix=3, covariance_type="diag", n_iter=1000)
         feature = np.ndarray(shape=(1, 13))
         feature = imp.fit_transform(feature)
         for list_feature in data[label]:
@@ -149,8 +150,8 @@ def plot_confusion_matrix(cm, classes, normalize=False,
                  color="white" if cm[i, j] > thresh else "black")
 
     plt.tight_layout()
-    plt.ylabel('True label')
-    plt.xlabel('Predicted label')
+    plt.ylabel('真实标签')
+    plt.xlabel('预测标签')
     plt.show()
 
 
@@ -159,9 +160,18 @@ def report(y_test, y_pred, show_cm=True):
     print("混淆矩阵:\n\n", confusion_matrix(y_test, y_pred))
     print("——————————————————————————————————————————————————————")
     print("——————————————————————————————————————————————————————\n")
+
+    # classification_report函数
+    # sklearn.metrics 模块中的一个函数，用于生成分类报告，显示主要的分类指标。
+    # 精确度(查准率)：分类器正确预测为正类的样本数占所有预测为正类的样本数的比例。TP/(TP+FP)
+    # 召回率(查全率)：分类器正确预测为正类的样本数占所有实际为正类的样本数的比例。TP/(TP+FN)
+    # F1分数，精确度和召回率的调和平均值，用于平衡精确度和召回率。
+    # 支持度：每个类别的样本数量
     print("分类结果:\n\n", classification_report(y_test, y_pred))
     print("——————————————————————————————————————————————————————")
     print("——————————————————————————————————————————————————————\n")
+
+    # 准确率即混淆矩阵的正确性：(TP+TN)/(TP+TN+FP+FN)
     print("准确率:", accuracy_score(y_test, y_pred))
     print("——————————————————————————————————————————————————————")
     print("——————————————————————————————————————————————————————\n")
@@ -171,8 +181,7 @@ def report(y_test, y_pred, show_cm=True):
                               [0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
 
 
-
-# DOWN-JSON 函数
+# DOWN-JSON
 def save_to_json(data, file_name):
     with open(file_name, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4)
@@ -180,6 +189,8 @@ def save_to_json(data, file_name):
 
 
 if __name__ == '__main__':
+    start_time = time.time()
+
     sound_path = r"/Users/dususu/Desktop/data/spoken_digit"
     x_train, y_train, x_test, y_test, data = build_dataset(sound_path)
 
@@ -212,3 +223,7 @@ if __name__ == '__main__':
     # save_to_json({"data": data}, "data.json")
     # save_to_json({"x_train": x_train, "y_train": y_train}, "train_data.json")
     # save_to_json({"x_test": x_test, "y_test": y_test}, "test_data.json")
+
+    end_time = time.time()
+    run_time = end_time - start_time
+    print(f"代码运行时间: {run_time:.2f} 秒")
